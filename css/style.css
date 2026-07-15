@@ -916,6 +916,35 @@ body.reading .background-glow{
    GIFT SELECTION EXPERIENCE (NEW)
    =================================================== */
 
+   .gift-selection{
+
+    width:min(1100px,95vw);
+
+    margin:0 auto;
+
+    height:100vh;
+
+    display:grid;
+
+    grid-template-rows:
+
+        auto
+        auto
+        auto
+        1fr
+        130px
+        80px;
+
+    justify-items:center;
+
+    align-items:start;
+
+    padding:40px 20px 20px;
+
+    box-sizing:border-box;
+
+}
+
 .gift-selection-title{
 
     font-family:"Playfair Display",serif;
@@ -950,15 +979,17 @@ body.reading .background-glow{
 
     display:grid;
 
-    grid-template-columns:repeat(2,minmax(140px,1fr));
+    grid-template-columns:repeat(2,minmax(180px,1fr));
 
-    gap:24px;
+    gap:26px;
 
     justify-items:center;
 
     align-items:center;
 
     width:min(650px,95vw);
+
+    align-self:start;
 
 }
 
@@ -1074,7 +1105,7 @@ body.reading .background-glow{
 
     width:100%;
 
-    height:120px;
+    height:130px;
 
     display:flex;
 
@@ -1158,9 +1189,9 @@ body.reading .background-glow{
 
 .continue-button{
 
-    width:260px;
+    width:280px;
 
-    height:52px;
+    height:56px;
 
     border:none;
 
@@ -1178,6 +1209,10 @@ body.reading .background-glow{
 
     display:none;
 
+    align-self:center;
+
+    margin:0;
+
     transition:.35s ease;
 
 }
@@ -1194,33 +1229,22 @@ body.reading .background-glow{
 
 .gift-selection{
 
-    width:min(1100px,95vw);
+    width:95vw;
 
-    margin:0 auto;
+    height:100vh;
 
     display:grid;
 
     grid-template-rows:
 
         auto
-
         auto
-
+        auto
         1fr
-
         130px
-
         80px;
 
-    justify-items:center;
-
-    align-items:start;
-
-    height:100vh;
-
-    padding:40px 20px 20px;
-
-    box-sizing:border-box;
+    padding:24px 18px 18px;
 
 }
 .choice-message{

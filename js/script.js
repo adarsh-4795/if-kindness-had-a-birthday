@@ -598,7 +598,7 @@ which one you'd genuinely love.
           message.style.display="block";
           if(exploredGifts.size===5){
 
-    continueBtn.style.display="inline-block";
+    continueBtn.style.display="block";
     continueBtn.disabled=false;
     continueBtn.textContent="Seal My Choice ✨";
 
