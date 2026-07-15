@@ -977,19 +977,17 @@ body.reading .background-glow{
 
 .gift-grid{
 
+    width:900px;
+
+    margin:35px auto;
+
     display:grid;
 
-    grid-template-columns:repeat(2,minmax(180px,1fr));
+    grid-template-columns:repeat(3,170px);
 
-    gap:26px;
+    justify-content:center;
 
-    justify-items:center;
-
-    align-items:center;
-
-    width:min(650px,95vw);
-
-    align-self:start;
+    gap:40px 55px;
 
 }
 
@@ -1003,21 +1001,29 @@ body.reading .background-glow{
 
 .gift-card{
 
-    display:flex;
+    width:170px;
 
-    overflow:hidden;
+    height:170px;
+
+    border-radius:22px;
+
+    background:#fff;
+
+    border:2px solid #ead6ce;
+
+    display:flex;
 
     flex-direction:column;
 
+    justify-content:center;
+
     align-items:center;
 
-    gap:16px;
-
-    transition:
-    transform .35s ease,
-    opacity .35s ease;
-
     cursor:pointer;
+
+    transition:.35s;
+
+    position:relative;
 
 }
 
@@ -1047,9 +1053,13 @@ body.reading .background-glow{
 
 .gift-card img{
 
-    width:clamp(90px,24vw,130px);
+    width:82px;
 
-    transition:.45s ease;
+    height:82px;
+
+    object-fit:contain;
+
+    transition:.35s;
 
 }
 
@@ -1091,13 +1101,17 @@ body.reading .background-glow{
 
 .gift-card-hint{
 
+    margin-top:18px;
+
+    width:150px;
+
     text-align:center;
 
-    color:var(--color-muted);
+    font-size:.84rem;
 
-    line-height:1.6;
+    line-height:1.45;
 
-    max-width:180px;
+    color:#7d6763;
 
 }
 
@@ -1224,65 +1238,3 @@ body.reading .background-glow{
     transform:translateY(-2px);
 
 }
-
-@media (max-width:700px){
-
-.gift-selection{
-
-    width:95vw;
-
-    height:100vh;
-
-    display:grid;
-
-    grid-template-rows:
-
-        auto
-        auto
-        auto
-        1fr
-        130px
-        80px;
-
-    padding:24px 18px 18px;
-
-}
-.choice-message{
-
-    min-height:120px;
-
-    margin-top:20px;
-
-}
-
-.continue-button{
-
-    display:block;
-
-    width:100%;
-
-    max-width:280px;
-
-    margin:12px auto 0;
-
-}
-
-.gift-selection-title{
-
-    font-size:2rem;
-
-}
-
-.gift-selection-subtitle{
-
-    font-size:.95rem;
-
-}
-
-.gift-card img{
-
-    width:82px;
-
-}
-}
-
