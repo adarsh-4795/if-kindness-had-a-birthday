@@ -447,209 +447,66 @@ function showClosingMessage() {
    SCENE: GIFTS
    ======================================== */
 
-function showGiftScene() {
+function showGiftScene(){
 
-  document.body.classList.remove("reading");
-  exploredGifts.clear();
-finalSelection=null;
-  fadeInMusic(0.08,1800);
+    document.body.classList.remove("reading");
+    fadeInMusic(0.08,1800);
 
-  const scene=document.createElement("section");
-  scene.className="scene scene-gift hidden";
+    exploredGifts=new Set();
 
-  const container=document.createElement("div");
-  container.className="gift-selection";
-
-  const title=document.createElement("h2");
-  title.className="gift-selection-title";
-  title.textContent="Choose Your Little Surprise";
-
-  const subtitle=document.createElement("p");
-  subtitle.className="gift-selection-subtitle";
-  subtitle.innerHTML=`
-Each little box hides something different.<br><br>
-The only clues you'll get are the hints below them.
-`;
-
-  const grid=document.createElement("div");
-  grid.style.opacity="0";
-  grid.style.transform="translateY(40px)";
-  grid.className="gift-grid";
-
-  const ticker=document.createElement("div");
-  ticker.className="gift-ticker";
-
-  ticker.innerHTML=`
-  <span>
-  📢 SYSTEM NOTICE :
-  Closing this page without choosing a gift may accidentally activate the
-  "Choose Everything Protocol".
-  The developers insist this has never happened before...
-  probably.
-  </span>
-  `;
-
-  const message=document.createElement("div");
-  message.className="choice-message";
-  message.style.display="none";
-
-  const heading=document.createElement("h3");
-  heading.textContent="";
-
-  const para=document.createElement("p");
-  para.textContent="";
-
-  message.appendChild(heading);
-  message.appendChild(para);
-
-  const continueBtn=document.createElement("button");
-  continueBtn.className="continue-button";
-  continueBtn.textContent="Continue";
-
-  continueBtn.style.display="none";
-  continueBtn.disabled=true;
-
-  let selectedCard=null;
-
-  gifts.forEach((gift,index)=>{
-
-      const card=document.createElement("div");
-      card.className="gift-card";
-
-      const img=document.createElement("img");
-      img.src="assets/images/gift-closed.png";
-
-      const hint=document.createElement("div");
-      hint.className="gift-card-hint";
-      hint.textContent=gift.hint;
-
-      card.appendChild(img);
-      card.appendChild(hint);
-            card.addEventListener("click",()=>{
-
-          if(selectedCard){
-
-              selectedCard.classList.remove("selected");
-
-              const previousImg=selectedCard.querySelector("img");
-              previousImg.src="assets/images/gift-closed.png";
-
-              selectedCard.classList.remove("dimmed");
-
-              const previousHint=selectedCard.querySelector(".gift-card-hint");
-              previousHint.textContent=
-              gifts[selectedCard.dataset.index].hint;
-
-          }
-
-          card.dataset.index=index;
-          
-          selectedCard=card;
-          exploredGifts.add(index);
-          console.log("Gift clicked:", index);
-console.log("Explored:", exploredGifts.size);
-
-          document
-          .querySelectorAll(".gift-card")
-          .forEach(c=>{
-
-              c.classList.remove("selected");
-              c.classList.add("dimmed");
-
-          });
-
-          card.classList.remove("dimmed");
-          card.classList.add("selected");
-
-          img.src="assets/images/gift-open.png";
-
-          setTimeout(()=>{
-
-              img.src=gift.image;
-              img.alt=gift.description;
-
-          },650);
-
-          hint.textContent=gift.description;
-
-          heading.textContent =
-explorationMessages[Math.min(exploredGifts.size-1,4)];
-
-if(exploredGifts.size<5){
-
-para.innerHTML=`
-Keep following your curiosity.<br><br>
-There are still
-${5-exploredGifts.size}
-surprise${5-exploredGifts.size===1?"":"s"}
-waiting for you.
-`;
-
-}else{
-
-para.innerHTML=`
-You've discovered every surprise.<br><br>
-Now it's time to decide
-which one you'd genuinely love.
-`;
+    showGiftExplorer();
 
 }
 
-          message.style.display="block";
-          if(exploredGifts.size===5){
+function showGiftExplorer(){
 
-    continueBtn.style.display="block";
-    continueBtn.disabled=false;
-    continueBtn.textContent="Seal My Choice ✨";
+    const scene=document.createElement("section");
+    scene.className="scene scene-gift hidden";
 
-}else{
+    const container=document.createElement("div");
+    container.className="gift-selection";
 
-    continueBtn.style.display="none";
-    continueBtn.disabled=true;
+    const title=document.createElement("h2");
+    title.className="gift-selection-title";
+    title.textContent="Choose Your Little Surprise";
 
-}
+    const subtitle=document.createElement("p");
+    subtitle.className="gift-selection-subtitle";
+    subtitle.innerHTML=`
+    Each little box hides something different.<br><br>
+    Explore all five before making your final choice.
+    `;
 
-          
-      });
+    const grid=document.createElement("div");
+    grid.className="gift-grid";
 
-      grid.appendChild(card);
+    gifts.forEach((gift,index)=>{
 
-  });
-    continueBtn.addEventListener("click",()=>{
+        const card=document.createElement("div");
+        card.className="gift-card";
 
-      showEnding();
+        const img=document.createElement("img");
+        img.src="assets/images/gift-closed.png";
 
-  });
+        card.appendChild(img);
 
-  container.appendChild(title);
+        card.addEventListener("click",()=>{
 
-  container.appendChild(subtitle);
-  setTimeout(()=>{
+            openGiftPopup(index);
 
-    subtitle.style.transition="opacity .8s ease";
-    subtitle.style.opacity="0";
+        });
 
-},2600);
+        grid.appendChild(card);
 
-setTimeout(()=>{
+    });
 
-    grid.style.transition="all .9s ease";
-    grid.style.opacity="1";
-    grid.style.transform="translateY(0px)";
+    scene.appendChild(container);
 
-},3400);
+    container.appendChild(title);
+    container.appendChild(subtitle);
+    container.appendChild(grid);
 
-  container.appendChild(grid);
-
-  container.appendChild(message);
-
-  container.appendChild(continueBtn);
-
-  scene.appendChild(container);
-
-  scene.appendChild(ticker);
-
-  transitionToScene(scene);
+    transitionToScene(scene);
 
 }
 
