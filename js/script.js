@@ -445,7 +445,7 @@ function showClosingMessage() {
 
 /* ========================================
    SCENE: GIFTS
-   ======================================== */
+======================================== */
 
 function showGiftScene(){
 
@@ -454,11 +454,11 @@ function showGiftScene(){
 
     exploredGifts=new Set();
 
-    showGiftExplorer();
+    renderGiftExplorer();
 
 }
 
-function showGiftExplorer(){
+function renderGiftExplorer(){
 
     const scene=document.createElement("section");
     scene.className="scene scene-gift hidden";
@@ -474,7 +474,7 @@ function showGiftExplorer(){
     subtitle.className="gift-selection-subtitle";
     subtitle.innerHTML=`
     Each little box hides something different.<br><br>
-    Explore all five before making your final choice.
+    Explore every surprise before making your final decision.
     `;
 
     const grid=document.createElement("div");
@@ -488,11 +488,16 @@ function showGiftExplorer(){
         const img=document.createElement("img");
         img.src="assets/images/gift-closed.png";
 
+        const hint=document.createElement("div");
+        hint.className="gift-card-hint";
+        hint.textContent=gift.hint;
+
         card.appendChild(img);
+        card.appendChild(hint);
 
         card.addEventListener("click",()=>{
 
-            openGiftPopup(index);
+            showGiftPopup(index);
 
         });
 
@@ -500,11 +505,11 @@ function showGiftExplorer(){
 
     });
 
-    scene.appendChild(container);
-
     container.appendChild(title);
     container.appendChild(subtitle);
     container.appendChild(grid);
+
+    scene.appendChild(container);
 
     transitionToScene(scene);
 
