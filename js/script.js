@@ -27,26 +27,31 @@ const pages = [
 
 const gifts = [
   {
+    title: "A Moment of Peace",
     hint: "Something peaceful.",
     description: "A moment of stillness, a reminder to breathe.",
     image: "assets/images/gift1.jpg"
   },
   {
+    title: "A Little Keepsake",
     hint: "Something you can keep.",
     description: "A memory we share, preserved in time.",
     image: "assets/images/gift2.jpg"
   },
   {
+    title: "Something for Comfort",
     hint: "For difficult days.",
     description: "Comfort for when the world feels too heavy.",
     image: "assets/images/gift3.jpg"
   },
   {
+    title: "A Small Thing",
     hint: "Tiny, but meaningful.",
     description: "Small moments that add up to something big.",
     image: "assets/images/gift4.jpg"
   },
   {
+    title: "My Best Guess",
     hint: "My favourite guess.",
     description: "Something I hope you've been needing.",
     image: "assets/images/gift5.jpg"
@@ -67,20 +72,8 @@ const closingMessages = [
 
 let currentSceneEl = null;
 let currentPageIndex = 0;
-let currentGiftIndex = 0;
 let typingTimeout = null;
 let musicStarted = false;
-let exploredGifts = new Set();
-
-const explorationMessages = [
-    "That was your first instinct.",
-    "Ooo... now I'm curious.",
-    "You're making this difficult.",
-    "Just one more surprise to discover...",
-    "You've seen every little surprise."
-];
-
-let finalSelection = null;
 
 /* ========================================
    MUSIC MANAGEMENT
@@ -444,75 +437,268 @@ function showClosingMessage() {
 }
 
 /* ========================================
-   SCENE: GIFTS
-======================================== */
+   SCENE: GIFT SELECTION EXPERIENCE
+   ======================================== */
 
-function showGiftScene(){
+const giftExperience = (() => {
 
-    document.body.classList.remove("reading");
-    fadeInMusic(0.08,1800);
+  let selectedGiftIndex = null;
+  let scrollAreaEl = null;
+  let sealButtonEl = null;
 
-    exploredGifts=new Set();
+  /* ---------- gift list ---------- */
 
-    renderGiftExplorer();
+  function buildGiftCard(gift, index) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "gift-card";
+    card.setAttribute("aria-label", `Open gift: ${gift.hint}`);
 
-}
+    const img = document.createElement("img");
+    img.src = "assets/images/gift-closed.png";
+    img.alt = "";
+    img.className = "gift-card-image";
 
-function renderGiftExplorer(){
+    const hint = document.createElement("p");
+    hint.className = "gift-card-hint";
+    hint.textContent = gift.hint;
 
-    const scene=document.createElement("section");
-    scene.className="scene scene-gift hidden";
+    card.appendChild(img);
+    card.appendChild(hint);
 
-    const container=document.createElement("div");
-    container.className="gift-selection";
+    card.addEventListener("click", () => openGiftModal(index));
 
-    const title=document.createElement("h2");
-    title.className="gift-selection-title";
-    title.textContent="Choose Your Little Surprise";
+    return card;
+  }
 
-    const subtitle=document.createElement("p");
-    subtitle.className="gift-selection-subtitle";
-    subtitle.innerHTML=`
-    Each little box hides something different.<br><br>
-    Explore every surprise before making your final decision.
-    `;
+  function buildGiftList() {
+    const list = document.createElement("div");
+    list.className = "gift-list";
 
-    const grid=document.createElement("div");
-    grid.className="gift-grid";
-
-    gifts.forEach((gift,index)=>{
-
-        const card=document.createElement("div");
-        card.className="gift-card";
-
-        const img=document.createElement("img");
-        img.src="assets/images/gift-closed.png";
-
-        const hint=document.createElement("div");
-        hint.className="gift-card-hint";
-        hint.textContent=gift.hint;
-
-        card.appendChild(img);
-        card.appendChild(hint);
-
-        card.addEventListener("click",()=>{
-
-            showGiftPopup(index);
-
-        });
-
-        grid.appendChild(card);
-
+    gifts.forEach((gift, index) => {
+      list.appendChild(buildGiftCard(gift, index));
     });
 
-    container.appendChild(title);
-    container.appendChild(subtitle);
-    container.appendChild(grid);
+    return list;
+  }
 
-    scene.appendChild(container);
+  /* ---------- gift modal ---------- */
 
-    transitionToScene(scene);
+  function openGiftModal(index) {
+    const gift = gifts[index];
 
+    const overlay = document.createElement("div");
+    overlay.className = "gift-modal-overlay";
+
+    const modal = document.createElement("div");
+    modal.className = "gift-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+
+    const closeIcon = document.createElement("button");
+    closeIcon.type = "button";
+    closeIcon.className = "gift-modal-close-icon";
+    closeIcon.innerHTML = "&#10005;";
+    closeIcon.setAttribute("aria-label", "Close");
+
+    const badge = document.createElement("img");
+    badge.src = "assets/images/gift-open.png";
+    badge.alt = "";
+    badge.className = "gift-modal-badge";
+
+    const image = document.createElement("img");
+    image.src = gift.image;
+    image.alt = gift.title;
+    image.className = "gift-modal-image";
+
+    const title = document.createElement("h3");
+    title.className = "gift-modal-title";
+    title.textContent = gift.title;
+
+    const description = document.createElement("p");
+    description.className = "gift-modal-description";
+    description.textContent = gift.description;
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "gift-modal-close-button";
+    closeButton.textContent = "Close";
+
+    modal.appendChild(closeIcon);
+    modal.appendChild(badge);
+    modal.appendChild(image);
+    modal.appendChild(title);
+    modal.appendChild(description);
+    modal.appendChild(closeButton);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => overlay.classList.add("visible"));
+
+    function close() {
+      overlay.classList.remove("visible");
+      document.removeEventListener("keydown", onKeydown);
+      setTimeout(() => overlay.remove(), 250);
+    }
+
+    function onKeydown(e) {
+      if (e.key === "Escape") close();
+    }
+
+    closeIcon.addEventListener("click", close);
+    closeButton.addEventListener("click", close);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener("keydown", onKeydown);
+  }
+
+  /* ---------- final selection ---------- */
+
+  function buildFinalSection() {
+    const section = document.createElement("div");
+    section.className = "gift-final";
+
+    const title = document.createElement("h3");
+    title.className = "gift-final-title";
+    title.textContent = "You've explored every surprise.";
+
+    const subtitle = document.createElement("p");
+    subtitle.className = "gift-final-subtitle";
+    subtitle.textContent = "Now choose the one you'd genuinely love.";
+
+    const options = document.createElement("div");
+    options.className = "gift-options";
+
+    gifts.forEach((gift, index) => {
+      const option = document.createElement("label");
+      option.className = "gift-option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "giftChoice";
+      input.value = String(index);
+
+      const text = document.createElement("span");
+      text.textContent = gift.hint;
+
+      input.addEventListener("change", () => {
+        selectedGiftIndex = index;
+        sealButtonEl.disabled = false;
+      });
+
+      option.appendChild(input);
+      option.appendChild(text);
+      options.appendChild(option);
+    });
+
+    sealButtonEl = document.createElement("button");
+    sealButtonEl.type = "button";
+    sealButtonEl.className = "seal-button";
+    sealButtonEl.textContent = "Seal My Choice \u2728";
+    sealButtonEl.disabled = true;
+    sealButtonEl.addEventListener("click", () => {
+      if (selectedGiftIndex !== null) openConfirmDialog();
+    });
+
+    section.appendChild(title);
+    section.appendChild(subtitle);
+    section.appendChild(options);
+    section.appendChild(sealButtonEl);
+
+    return section;
+  }
+
+  /* ---------- confirmation dialog ---------- */
+
+  function openConfirmDialog() {
+    const overlay = document.createElement("div");
+    overlay.className = "gift-modal-overlay";
+
+    const box = document.createElement("div");
+    box.className = "gift-confirm-box";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+
+    const text = document.createElement("p");
+    text.className = "gift-confirm-text";
+    text.textContent = "Are you sure this is your final choice?";
+
+    const actions = document.createElement("div");
+    actions.className = "gift-confirm-actions";
+
+    const yesButton = document.createElement("button");
+    yesButton.type = "button";
+    yesButton.className = "gift-confirm-yes";
+    yesButton.textContent = "Yes, I'm sure";
+
+    const backButton = document.createElement("button");
+    backButton.type = "button";
+    backButton.className = "gift-confirm-back";
+    backButton.textContent = "Go Back";
+
+    yesButton.addEventListener("click", () => {
+      overlay.remove();
+      submitGiftSelection(gifts[selectedGiftIndex]);
+      showEnding();
+    });
+
+    backButton.addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    actions.appendChild(yesButton);
+    actions.appendChild(backButton);
+    box.appendChild(text);
+    box.appendChild(actions);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => overlay.classList.add("visible"));
+  }
+
+  /* ---------- future integration ---------- */
+
+  function submitGiftSelection(selectedGift) {
+    // TODO: Send selected gift to Telegram
+  }
+
+  /* ---------- scene assembly ---------- */
+
+  function render() {
+    selectedGiftIndex = null;
+
+    const scene = document.createElement("section");
+    scene.className = "scene scene-gift hidden";
+
+    scrollAreaEl = document.createElement("div");
+    scrollAreaEl.className = "gift-scroll-area";
+
+    const title = document.createElement("h2");
+    title.className = "gift-title";
+    title.textContent = "Choose Your Little Surprise";
+
+    const subtitle = document.createElement("p");
+    subtitle.className = "gift-subtitle";
+    subtitle.textContent = "Explore every surprise before making your final decision.";
+
+    scrollAreaEl.appendChild(title);
+    scrollAreaEl.appendChild(subtitle);
+    scrollAreaEl.appendChild(buildGiftList());
+    scrollAreaEl.appendChild(buildFinalSection());
+
+    scene.appendChild(scrollAreaEl);
+
+    return scene;
+  }
+
+  return { render };
+
+})();
+
+function showGiftScene() {
+  transitionToScene(giftExperience.render());
 }
 
 /* ========================================
