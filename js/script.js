@@ -2,60 +2,39 @@
    CONTENT DATA
    ======================================== */
 
-const pages = [
-  {
-    title: "My Dear Friend",
-    text: "There are some people in life who arrive quietly, but change everything. You are one of them.\n\nEvery conversation we've had, every laugh shared, every moment you stayed—these are the things that made me feel less alone in this world."
-  },
-  {
-    title: "",
-    text: "You have this gift of listening that's rare. You don't just hear words; you hear what's underneath them. You remember the small things, the details that most people forget."
-  },
-  {
-    title: "",
-    text: "You've been there in the quiet moments, in the hard moments, in the moments when I needed someone to just... understand.\n\nThank you for that."
-  },
-  {
-    title: "",
-    text: "Birthdays are meant to celebrate the person you are. And today, I want to celebrate you—not just the kind things you do, but the way you simply exist, the way you make people feel seen."
-  },
-  {
-    title: "",
-    text: "This experience is small, like everything I do. But inside it, I've tried to place something meaningful for you—not something you need, but something that might make you smile."
-  }
-];
+const pages = letterPages;
 
 const gifts = [
-  {
-    title: "A Moment of Peace",
-    hint: "Something peaceful.",
-    description: "A moment of stillness, a reminder to breathe.",
-    image: "assets/images/gift1.jpg"
-  },
-  {
-    title: "A Little Keepsake",
-    hint: "Something you can keep.",
-    description: "A memory we share, preserved in time.",
-    image: "assets/images/gift2.jpg"
-  },
-  {
-    title: "Something for Comfort",
-    hint: "For difficult days.",
-    description: "Comfort for when the world feels too heavy.",
-    image: "assets/images/gift3.jpg"
-  },
-  {
-    title: "A Small Thing",
-    hint: "Tiny, but meaningful.",
-    description: "Small moments that add up to something big.",
-    image: "assets/images/gift4.jpg"
-  },
-  {
-    title: "My Best Guess",
-    hint: "My favourite guess.",
-    description: "Something I hope you've been needing.",
-    image: "assets/images/gift5.jpg"
-  }
+{
+    id:1,
+    image:"assets/images/gift1.jpg",
+    hint:"A moment of stillness, a reminder to breathe.",
+    title:"Something peaceful."
+},
+{
+    id:2,
+    image:"assets/images/gift2.jpg",
+    hint:"A quiet reminder of faith, strength and protection.",
+    title:"Something to keep close."
+},
+{
+    id:3,
+    image:"assets/images/gift3.jpg",
+    hint:"Small moments that add up to something big.",
+    title:"Tiny, but meaningful."
+},
+{
+    id:4,
+    image:"assets/images/gift4.jpg",
+    hint:"For every journey that still waits ahead.",
+    title:"Something you'll carry with you."
+},
+{
+    id:5,
+    image:"assets/images/gift5.jpg",
+    hint:"Something I hope you'll wear with a smile.",
+    title:"My favourite guess."
+}
 ];
 
 const closingMessages = [
@@ -697,6 +676,9 @@ const giftExperience = (() => {
 
 })();
 
+showArtwork();
+return;
+
 function showGiftScene() {
   transitionToScene(giftExperience.render());
 }
@@ -736,3 +718,21 @@ function showEnding() {
 document.addEventListener("DOMContentLoaded", () => {
   showOpening();
 });
+
+function showArtwork(){
+
+document.getElementById("app").innerHTML=`
+<div class="scene artwork-scene">
+
+<img src="assets/images/final-artwork.jpg"
+class="final-artwork">
+
+<button class="primary-btn"
+onclick="showGiftScene()">
+Continue
+</button>
+
+</div>
+`;
+
+}
