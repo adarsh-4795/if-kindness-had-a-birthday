@@ -968,22 +968,29 @@ text.style.fontSize = "1rem";
 function showMagazineCover() {
   const scene = document.createElement("section");
   scene.className = "scene scene-ending hidden";
-scene.style.overflowY = "auto";
-scene.style.padding = "40px 24px";
+
+  scene.style.overflowY = "auto";
+  scene.style.padding = "40px 24px";
+  scene.style.justifyContent = "flex-start";
 
   const img = document.createElement("img");
   setImageSrc(img, "assets/images/magazine-cover.jpeg");
   img.alt = "Magazine Cover";
-  img.style.maxWidth = "90vw";
-  img.style.width = "min(92vw, 520px)";
+
+  img.style.width = "90%";
+  img.style.maxWidth = "650px";
   img.style.height = "auto";
-  img.style.maxHeight = "55vh";
+  img.style.objectFit = "contain";
   img.style.borderRadius = "18px";
   img.style.boxShadow = "0 25px 60px rgba(0,0,0,0.25)";
 
   const text = document.createElement("div");
   text.className = "ending-text";
-  text.style.marginTop = "28px";
+  text.style.maxWidth = "720px";
+  text.style.fontSize = "1rem";
+  text.style.lineHeight = "1.7";
+  text.style.marginTop = "24px";
+
   text.innerHTML = `
       <p>Keep spreading the kindness, smiles and care</p>
       <p>that make people feel heard.</p>
@@ -1001,9 +1008,16 @@ scene.style.padding = "40px 24px";
         — Your Elderly Person
       </p>
   `;
+
   scene.appendChild(img);
   scene.appendChild(text);
+
   transitionToScene(scene);
+
+  window.scrollTo({
+      top: 0,
+      behavior: "instant"
+  });
 }
 
 /* ========================================
@@ -1018,37 +1032,53 @@ function showArtwork() {
   const scene = document.createElement("section");
   scene.className = "scene scene-ending hidden";
 
+  scene.style.overflowY = "auto";
+  scene.style.padding = "40px 24px";
+  scene.style.justifyContent = "flex-start";
+
   const img = document.createElement("img");
   setImageSrc(img, "assets/images/final-artwork.jpg");
   img.alt = "A final little surprise";
-  img.className = "final-artwork";
+
+  img.style.width = "90%";
+  img.style.maxWidth = "650px";
+  img.style.height = "auto";
+  img.style.objectFit = "contain";
+  img.style.borderRadius = "20px";
+  img.style.boxShadow = "0 20px 50px rgba(0,0,0,.25)";
+
+  const text = document.createElement("div");
+  text.className = "ending-text";
+  text.style.maxWidth = "720px";
+  text.style.fontSize = "1rem";
+  text.style.lineHeight = "1.7";
+  text.style.marginTop = "20px";
+
+  text.innerHTML = `
+      <p style="font-size:1.35em;">
+          Wishing you a birthday
+      </p>
+
+      <p style="font-size:1.35em;">
+          like none before.
+      </p>
+  `;
 
   const button = document.createElement("button");
   button.type = "button";
   button.className = "letter-button primary-btn";
   button.textContent = "Continue";
+  button.style.marginTop = "25px";
   button.addEventListener("click", showEnding);
 
   scene.appendChild(img);
-  const text = document.createElement("div");
-text.className = "ending-text";
-text.style.maxWidth = "720px";
-text.style.fontSize = "1rem";
-text.style.lineHeight = "1.7";
-text.style.marginTop = "24px";
-
-text.innerHTML = `
-    <p style="font-size:1.35em;">
-        Wishing you a birthday
-    </p>
-
-    <p style="font-size:1.35em;">
-        like none before.
-    </p>
-`;
-
-scene.appendChild(text);
+  scene.appendChild(text);
   scene.appendChild(button);
 
   transitionToScene(scene);
+
+  window.scrollTo({
+      top: 0,
+      behavior: "instant"
+  });
 }
