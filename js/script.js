@@ -39,8 +39,71 @@ const gifts = [
     hint:"Something I hope you'll wear with a smile.",
     title:"My favourite guess.",
     description:"Something I hope you'll wear with a smile."
+},
+{
+    id:6,
+    image:"assets/images/gift6.jpeg",
+    hint:"Because you deserve better relief than a tablet and gritted teeth.",
+    title:"Something for the headaches.",
+    description:"For the days your head won't quiet down — something softer than a painkiller."
+},
+{
+    id:7,
+    image:"assets/images/gift7.jpeg",
+    hint:"For the old songs, the podcasts, and pretending you didn't hear me the first time.",
+    title:"Something for your ears.",
+    description:"So the next old song you send yourself sounds exactly as good as you remember."
+},
+{
+    id:8,
+    image:"assets/images/gift8.jpeg",
+    hint:"One for the desk, one for the commute — no excuses left.",
+    title:"Something musical, times two.",
+    description:"Over-ear for the long days, and a tiny pair that fits in your bag for the days in between."
+},
+{
+    id:9,
+    image:"assets/images/gift9.jpeg",
+    hint:"A little stillness for your desk, straight from Kailash.",
+    title:"Something for your shelf.",
+    description:"For the quiet corner of your room, and the quieter corner of your mind."
+},
+{
+    id:10,
+    image:"assets/images/gift10.jpeg",
+    hint:"A little something that's unmistakably, personally, yours.",
+    title:"Something with your name on it.",
+    description:"Because everything else on your desk is generic. This one isn't."
 }
 ];
+
+/* ========================================
+   EMAIL NOTIFICATION (via EmailJS)
+   ======================================== */
+
+// EmailJS lets a static site send email without needing a server of
+// your own. Its "public key" is safe to use client-side (unlike a
+// Gmail password or an API secret) — it's scoped to your account and
+// rate-limited, which is exactly what it's designed for.
+//
+// SETUP (~5 minutes):
+// 1. Create a free account at https://www.emailjs.com (200 emails/month free)
+// 2. Email Services -> Add New Service -> connect Gmail (adarsh.niftem@gmail.com)
+//      -> copy the Service ID it gives you
+// 3. Email Templates -> Create New Template. Use variables in the body like:
+//      Her final choice: {{gift_title}}
+//      {{gift_hint}}
+//      Chosen at: {{timestamp}}
+//    Set the "To email" field to {{to_email}} -> copy the Template ID
+// 4. Account -> General -> copy your Public Key
+// 5. Paste all three values into the constants below.
+//
+// index.html already includes the EmailJS SDK script tag needed for this to work.
+
+const EMAILJS_PUBLIC_KEY = "YOUR_EMAILJS_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID = "YOUR_EMAILJS_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID = "YOUR_EMAILJS_TEMPLATE_ID";
+const NOTIFY_EMAIL = "adarsh.niftem@gmail.com";
 
 const closingMessages = [
   "One last thing...",
@@ -64,7 +127,7 @@ let musicStarted = false;
 
 const music = new Audio("assets/audio/Friends.mp3");
 music.loop = false;
-music.volume = 0.06;
+music.volume = 0.30;
 
 music.addEventListener("ended", () => {
   setTimeout(() => {
@@ -155,6 +218,32 @@ function transitionToScene(sceneElement) {
   });
   hideCurrentScene();
   currentSceneEl = sceneElement;
+}
+
+/* ========================================
+   TOAST / FLASH MESSAGES
+   ======================================== */
+
+let activeToastTimeout = null;
+
+function showToast(message, duration = 3200) {
+  const existing = document.querySelector(".flash-toast");
+  if (existing) existing.remove();
+  if (activeToastTimeout) clearTimeout(activeToastTimeout);
+
+  const toast = document.createElement("div");
+  toast.className = "flash-toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("visible"));
+
+  activeToastTimeout = setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+
+  return toast;
 }
 
 /* ========================================
@@ -364,7 +453,7 @@ function showLetter() {
   container.appendChild(paper);
   scene.appendChild(container);
 
-  fadeInMusic(0.025, 1800);
+  fadeInMusic(0.050, 1800);
 
   currentPageIndex = 0;
   renderLetterPage(title, text, pageIndicator, prevBtn, nextBtn);
@@ -441,11 +530,16 @@ function showClosingMessage() {
 
 const giftExperience = (() => {
 
+  let exploredGifts = new Set();
   let selectedGiftIndex = null;
-  let scrollAreaEl = null;
-  let sealButtonEl = null;
+  let continueBtnEl = null;
+  let continueNoteEl = null;
+  let confirmBarEl = null;
+  let selectionCardsEl = [];
 
-  /* ---------- gift list ---------- */
+  /* ========================================
+     STAGE 1 — EXPLORE
+     ======================================== */
 
   function buildGiftCard(gift, index) {
     const card = document.createElement("button");
@@ -480,8 +574,6 @@ const giftExperience = (() => {
 
     return list;
   }
-
-  /* ---------- gift modal ---------- */
 
   function openGiftModal(index) {
     const gift = gifts[index];
@@ -550,129 +642,72 @@ const giftExperience = (() => {
       if (e.target === overlay) close();
     });
     document.addEventListener("keydown", onKeydown);
+
+    markExplored(index);
   }
 
-  /* ---------- final selection ---------- */
+  function markExplored(index) {
+    if (exploredGifts.has(index)) return;
+    exploredGifts.add(index);
+    updateContinueSection();
+  }
 
-  function buildFinalSection() {
+  function updateContinueSection() {
+    if (!continueBtnEl || !continueNoteEl) return;
+
+    const remaining = gifts.length - exploredGifts.size;
+
+    if (remaining <= 0) {
+      continueBtnEl.disabled = false;
+      continueNoteEl.textContent = "You've read every hint. Ready when you are.";
+    } else {
+      continueBtnEl.disabled = true;
+      continueNoteEl.textContent =
+        remaining === 1
+          ? "Open 1 more gift to continue."
+          : `Open ${remaining} more gifts to continue.`;
+    }
+  }
+
+  function buildContinueSection() {
     const section = document.createElement("div");
-    section.className = "gift-final";
+    section.className = "gift-continue";
 
-    const title = document.createElement("h3");
-    title.className = "gift-final-title";
-    title.textContent = "You've explored every surprise.";
+    continueNoteEl = document.createElement("p");
+    continueNoteEl.className = "gift-continue-note";
 
-    const subtitle = document.createElement("p");
-    subtitle.className = "gift-final-subtitle";
-    subtitle.textContent = "Now choose the one you'd genuinely love.";
+    continueBtnEl = document.createElement("button");
+    continueBtnEl.type = "button";
+    continueBtnEl.className = "seal-button";
+    continueBtnEl.textContent = "Continue \u2192";
+    continueBtnEl.disabled = true;
 
-    const options = document.createElement("div");
-    options.className = "gift-options";
-
-    gifts.forEach((gift, index) => {
-      const option = document.createElement("label");
-      option.className = "gift-option";
-
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = "giftChoice";
-      input.value = String(index);
-
-      const text = document.createElement("span");
-      text.textContent = gift.hint;
-
-      input.addEventListener("change", () => {
-        selectedGiftIndex = index;
-        sealButtonEl.disabled = false;
-      });
-
-      option.appendChild(input);
-      option.appendChild(text);
-      options.appendChild(option);
+    continueBtnEl.addEventListener("click", () => {
+      if (continueBtnEl.disabled) return;
+      showToast(
+        "Lovely \uD83D\uDE04 Don't worry, I'm not that mean of a friend — you can still revisit every hint. Your final pick happens on the next page.",
+        4200
+      );
+      setTimeout(() => {
+        transitionToScene(renderSelectionStage());
+      }, 900);
     });
 
-    sealButtonEl = document.createElement("button");
-    sealButtonEl.type = "button";
-    sealButtonEl.className = "seal-button";
-    sealButtonEl.textContent = "Seal My Choice \u2728";
-    sealButtonEl.disabled = true;
-    sealButtonEl.addEventListener("click", () => {
-      if (selectedGiftIndex !== null) openConfirmDialog();
-    });
-
-    section.appendChild(title);
-    section.appendChild(subtitle);
-    section.appendChild(options);
-    section.appendChild(sealButtonEl);
+    section.appendChild(continueNoteEl);
+    section.appendChild(continueBtnEl);
 
     return section;
   }
 
-  /* ---------- confirmation dialog ---------- */
-
-  function openConfirmDialog() {
-    const overlay = document.createElement("div");
-    overlay.className = "gift-modal-overlay";
-
-    const box = document.createElement("div");
-    box.className = "gift-confirm-box";
-    box.setAttribute("role", "dialog");
-    box.setAttribute("aria-modal", "true");
-
-    const text = document.createElement("p");
-    text.className = "gift-confirm-text";
-    text.textContent = "Are you sure this is your final choice?";
-
-    const actions = document.createElement("div");
-    actions.className = "gift-confirm-actions";
-
-    const yesButton = document.createElement("button");
-    yesButton.type = "button";
-    yesButton.className = "gift-confirm-yes";
-    yesButton.textContent = "Yes, I'm sure";
-
-    const backButton = document.createElement("button");
-    backButton.type = "button";
-    backButton.className = "gift-confirm-back";
-    backButton.textContent = "Go Back";
-
-    yesButton.addEventListener("click", () => {
-      overlay.remove();
-      submitGiftSelection(gifts[selectedGiftIndex]);
-      showArtwork();
-    });
-
-    backButton.addEventListener("click", () => overlay.remove());
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) overlay.remove();
-    });
-
-    actions.appendChild(yesButton);
-    actions.appendChild(backButton);
-    box.appendChild(text);
-    box.appendChild(actions);
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-
-    requestAnimationFrame(() => overlay.classList.add("visible"));
-  }
-
-  /* ---------- future integration ---------- */
-
-  function submitGiftSelection(selectedGift) {
-    // TODO: Send selected gift to Telegram
-  }
-
-  /* ---------- scene assembly ---------- */
-
-  function render() {
+  function renderExploreStage() {
+    exploredGifts = new Set();
     selectedGiftIndex = null;
 
     const scene = document.createElement("section");
     scene.className = "scene scene-gift hidden";
 
-    scrollAreaEl = document.createElement("div");
-    scrollAreaEl.className = "gift-scroll-area";
+    const scrollArea = document.createElement("div");
+    scrollArea.className = "gift-scroll-area";
 
     const title = document.createElement("h2");
     title.className = "gift-title";
@@ -682,23 +717,195 @@ const giftExperience = (() => {
     subtitle.className = "gift-subtitle";
     subtitle.textContent = "Explore every surprise before making your final decision.";
 
-    scrollAreaEl.appendChild(title);
-    scrollAreaEl.appendChild(subtitle);
-    scrollAreaEl.appendChild(buildGiftList());
-    scrollAreaEl.appendChild(buildFinalSection());
+    scrollArea.appendChild(title);
+    scrollArea.appendChild(subtitle);
+    scrollArea.appendChild(buildGiftList());
+    scrollArea.appendChild(buildContinueSection());
 
-    scene.appendChild(scrollAreaEl);
+    scene.appendChild(scrollArea);
+
+    setTimeout(() => {
+      showToast("Choose wisely \u2014 you can only pick one, based on the hints below. \uD83D\uDC40", 3800);
+    }, 500);
+
+    updateContinueSection();
 
     return scene;
   }
 
-  return { render };
+  /* ========================================
+     STAGE 2 — FINAL SELECTION
+     ======================================== */
+
+  function buildSelectionCard(gift, index) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "selection-card";
+    card.setAttribute("aria-label", `Select gift: ${gift.title}`);
+
+    const img = document.createElement("img");
+    setImageSrc(img, gift.image);
+    img.alt = gift.title;
+    img.className = "selection-card-image";
+
+    const title = document.createElement("p");
+    title.className = "selection-card-title";
+    title.textContent = gift.title;
+
+    const hint = document.createElement("p");
+    hint.className = "selection-card-hint";
+    hint.textContent = gift.hint;
+
+    const check = document.createElement("div");
+    check.className = "selection-card-check";
+    check.innerHTML = "&#10003;";
+
+    card.appendChild(check);
+    card.appendChild(img);
+    card.appendChild(title);
+    card.appendChild(hint);
+
+    card.addEventListener("click", () => selectGift(index));
+
+    return card;
+  }
+
+  function buildSelectionGrid() {
+    const grid = document.createElement("div");
+    grid.className = "selection-grid";
+
+    selectionCardsEl = gifts.map((gift, index) => {
+      const card = buildSelectionCard(gift, index);
+      grid.appendChild(card);
+      return card;
+    });
+
+    return grid;
+  }
+
+  function selectGift(index) {
+    selectedGiftIndex = index;
+
+    selectionCardsEl.forEach((card, i) => {
+      card.classList.toggle("selected", i === index);
+    });
+
+    if (confirmBarEl) {
+      confirmBarEl.classList.add("visible");
+    }
+  }
+
+  function buildConfirmBar() {
+    const bar = document.createElement("div");
+    bar.className = "gift-confirm-bar";
+
+    const text = document.createElement("p");
+    text.className = "gift-confirm-bar-text";
+    text.textContent = "Are you sure about this, or would you like to change your mind?";
+
+    const actions = document.createElement("div");
+    actions.className = "gift-confirm-bar-actions";
+
+    const changeButton = document.createElement("button");
+    changeButton.type = "button";
+    changeButton.className = "gift-confirm-back";
+    changeButton.textContent = "Change";
+
+    const finalButton = document.createElement("button");
+    finalButton.type = "button";
+    finalButton.className = "seal-button";
+    finalButton.textContent = "Final \u2728";
+
+    changeButton.addEventListener("click", () => {
+      selectedGiftIndex = null;
+      selectionCardsEl.forEach((card) => card.classList.remove("selected"));
+      bar.classList.remove("visible");
+    });
+
+    finalButton.addEventListener("click", () => {
+      if (selectedGiftIndex === null) return;
+      finalButton.disabled = true;
+      changeButton.disabled = true;
+      submitGiftSelection(gifts[selectedGiftIndex]);
+      showArtwork();
+    });
+
+    actions.appendChild(changeButton);
+    actions.appendChild(finalButton);
+    bar.appendChild(text);
+    bar.appendChild(actions);
+
+    return bar;
+  }
+
+  function renderSelectionStage() {
+    selectedGiftIndex = null;
+
+    const scene = document.createElement("section");
+    scene.className = "scene scene-gift-selection hidden";
+
+    const scrollArea = document.createElement("div");
+    scrollArea.className = "gift-scroll-area";
+
+    const title = document.createElement("h2");
+    title.className = "gift-title";
+    title.textContent = "Alright, Which One Is It Going To Be?";
+
+    const subtitle = document.createElement("p");
+    subtitle.className = "gift-subtitle";
+    subtitle.textContent = "Tap the one you'd genuinely love. You can still change it before it's final.";
+
+    const warning = document.createElement("p");
+    warning.className = "gift-teasing-note";
+    warning.textContent =
+      "Fair warning: not choosing isn't actually an option. Leave this blank and I'm auto-ordering literally every single one for you. Not all at once though, I'm not made of money. \uD83D\uDE08";
+
+    scrollArea.appendChild(title);
+    scrollArea.appendChild(subtitle);
+    scrollArea.appendChild(warning);
+    scrollArea.appendChild(buildSelectionGrid());
+
+    confirmBarEl = buildConfirmBar();
+    scrollArea.appendChild(confirmBarEl);
+
+    scene.appendChild(scrollArea);
+
+    return scene;
+  }
+
+  /* ---------- future integration ---------- */
+
+  function submitGiftSelection(selectedGift) {
+    if (typeof emailjs === "undefined") {
+      console.log("EmailJS SDK not loaded; skipping email notification.");
+      return;
+    }
+
+    emailjs
+      .send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          to_email: NOTIFY_EMAIL,
+          gift_title: selectedGift.title,
+          gift_hint: selectedGift.hint,
+          gift_description: selectedGift.description,
+          timestamp: new Date().toLocaleString(),
+        },
+        EMAILJS_PUBLIC_KEY
+      )
+      .catch((err) => {
+        console.log("Could not send email notification:", err);
+      });
+  }
+
+  return { renderExploreStage };
 
 })();
 
 
 function showGiftScene() {
-  transitionToScene(giftExperience.render());
+  transitionToScene(giftExperience.renderExploreStage());
 }
 
 /* ========================================
@@ -708,24 +915,94 @@ function showGiftScene() {
 function showEnding() {
   const scene = document.createElement("section");
   scene.className = "scene scene-ending hidden";
+scene.style.overflowY = "auto";
+scene.style.padding = "40px 24px";
+scene.style.justifyContent = "flex-start";
 
   const title = document.createElement("h1");
   title.className = "ending-title";
-  title.textContent = "Thank you...";
+  title.textContent = "One Last Surprise...";
 
   const text = document.createElement("div");
   text.className = "ending-text";
+text.style.maxWidth = "720px";
+text.style.lineHeight = "1.75";
+text.style.fontSize = "1rem";
   text.innerHTML = `
-    <p>For every conversation.</p>
-    <p>Every laugh.</p>
-    <p>Every time you stayed.</p>
-    <p style="margin-top: 16px;">And...</p>
-    <p style="margin-top: 16px; font-size: 1.2em;">Happy Birthday.</p>
+    <p>Do you remember one day you told me</p>
+    <p>that you'd love to be on the cover of a magazine someday?</p>
+
+    <p style="margin-top:24px;">
+      I don't know whether that day comes tomorrow,
+      a few years from now,
+      or somewhere much later.
+    </p>
+
+    <p style="margin-top:18px;">
+      But I wasn't going to let your birthday pass
+      without making at least one cover
+      that belongs only to you.
+    </p>
+
+    <p style="margin-top:22px;">
+      So...
+    </p>
+
+    <p style="margin-top:8px;font-size:1.35em;font-weight:600;">
+      Here's your first one.
+    </p>
+
+    <button id="showMagazineBtn" class="letter-button" style="margin-top:34px;">
+      Show Me ❤️
+    </button>
   `;
 
   scene.appendChild(title);
   scene.appendChild(text);
 
+  text.querySelector("#showMagazineBtn").addEventListener("click", showMagazineCover);
+
+  transitionToScene(scene);
+}
+
+function showMagazineCover() {
+  const scene = document.createElement("section");
+  scene.className = "scene scene-ending hidden";
+scene.style.overflowY = "auto";
+scene.style.padding = "40px 24px";
+
+  const img = document.createElement("img");
+  setImageSrc(img, "assets/images/magazine-cover.jpeg");
+  img.alt = "Magazine Cover";
+  img.style.maxWidth = "90vw";
+  img.style.width = "min(92vw, 520px)";
+  img.style.height = "auto";
+  img.style.maxHeight = "55vh";
+  img.style.borderRadius = "18px";
+  img.style.boxShadow = "0 25px 60px rgba(0,0,0,0.25)";
+
+  const text = document.createElement("div");
+  text.className = "ending-text";
+  text.style.marginTop = "28px";
+  text.innerHTML = `
+      <p>Keep spreading the kindness, smiles and care</p>
+      <p>that make people feel heard.</p>
+
+      <p style="margin-top:20px;">
+        The world could always use
+        one more Listener.
+      </p>
+
+      <p style="margin-top:28px;font-size:1.25em;">
+        Happy Birthday.
+      </p>
+
+      <p style="margin-top:10px;">
+        — Your Elderly Person
+      </p>
+  `;
+  scene.appendChild(img);
+  scene.appendChild(text);
   transitionToScene(scene);
 }
 
@@ -739,7 +1016,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function showArtwork() {
   const scene = document.createElement("section");
-  scene.className = "scene artwork-scene hidden";
+  scene.className = "scene scene-ending hidden";
 
   const img = document.createElement("img");
   setImageSrc(img, "assets/images/final-artwork.jpg");
@@ -753,6 +1030,24 @@ function showArtwork() {
   button.addEventListener("click", showEnding);
 
   scene.appendChild(img);
+  const text = document.createElement("div");
+text.className = "ending-text";
+text.style.maxWidth = "720px";
+text.style.fontSize = "1rem";
+text.style.lineHeight = "1.7";
+text.style.marginTop = "24px";
+
+text.innerHTML = `
+    <p style="font-size:1.35em;">
+        Wishing you a birthday
+    </p>
+
+    <p style="font-size:1.35em;">
+        like none before.
+    </p>
+`;
+
+scene.appendChild(text);
   scene.appendChild(button);
 
   transitionToScene(scene);
