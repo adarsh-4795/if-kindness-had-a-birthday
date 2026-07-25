@@ -70,10 +70,10 @@ const gifts = [
 },
 {
     id:10,
-    image:"assets/images/gift10.jpeg",
-    hint:"A little something that's unmistakably, personally, yours.",
-    title:"Something with your name on it.",
-    description:"Because everything else on your desk is generic. This one isn't."
+    image:"assets/images/gift11.jpg",
+    hint:"Something that can make every journey, every drive and every quiet evening a little more musical.",
+    title:"For someone who listens so well... here's something that deserves to be listened to.",
+    description:"A portable Bluetooth speaker."
 }
 ];
 
@@ -100,10 +100,16 @@ const gifts = [
 //
 // index.html already includes the EmailJS SDK script tag needed for this to work.
 
-const EMAILJS_PUBLIC_KEY = "YOUR_EMAILJS_PUBLIC_KEY";
-const EMAILJS_SERVICE_ID = "YOUR_EMAILJS_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "YOUR_EMAILJS_TEMPLATE_ID";
+const EMAILJS_PUBLIC_KEY = "Vbcda4KEfexQfkafa";
+const EMAILJS_SERVICE_ID = "service_vii9k6w";
+const EMAILJS_TEMPLATE_ID = "template_gozef3x";
 const NOTIFY_EMAIL = "adarsh.niftem@gmail.com";
+
+if (typeof emailjs !== "undefined") {
+  emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY,
+  });
+}
 
 const closingMessages = [
   "One last thing...",
@@ -360,6 +366,7 @@ function showEnvelope() {
   const text = document.createElement("p");
   text.className = "envelope-text";
   text.textContent = "A Little Something";
+  text.style.opacity = "0";
 
   const flap = document.createElement("div");
   flap.className = "envelope-flap";
@@ -379,10 +386,13 @@ function showEnvelope() {
   envelope.addEventListener("click", () => {
     if (envelope.classList.contains("opened")) return;
     setTimeout(() => {
-
     envelope.classList.add("opened");
-
 },250);
+
+setTimeout(() => {
+    text.style.opacity = "1";
+}, 700);
+
     setTimeout(() => {
       hint.style.opacity = "0";
       hint.style.pointerEvents = "none";
@@ -881,21 +891,37 @@ const giftExperience = (() => {
       return;
     }
 
-    emailjs
-      .send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          to_email: NOTIFY_EMAIL,
-          gift_title: selectedGift.title,
-          gift_hint: selectedGift.hint,
-          gift_description: selectedGift.description,
-          timestamp: new Date().toLocaleString(),
-        },
-        EMAILJS_PUBLIC_KEY
-      )
+    if (
+      EMAILJS_PUBLIC_KEY === "YOUR_EMAILJS_PUBLIC_KEY" ||
+      EMAILJS_SERVICE_ID === "YOUR_EMAILJS_SERVICE_ID" ||
+      EMAILJS_TEMPLATE_ID === "YOUR_EMAILJS_TEMPLATE_ID"
+    ) {
+      console.warn(
+        "EMAIL NOT SENT: the EMAILJS_PUBLIC_KEY / EMAILJS_SERVICE_ID / EMAILJS_TEMPLATE_ID " +
+          "constants near the top of script.js are still placeholder values. " +
+          "See the setup steps in the comment above them."
+      );
+      return;
+    }
+
+    emailjs.send(
+    EMAILJS_SERVICE_ID,
+    EMAILJS_TEMPLATE_ID,
+    {
+        to_email: NOTIFY_EMAIL,
+        gift_title: selectedGift.title,
+        gift_hint: selectedGift.hint,
+        gift_description: selectedGift.description,
+        gift_image: selectedGift.image.split("/").pop(),
+        timestamp: new Date().toLocaleString(),
+    },
+    EMAILJS_PUBLIC_KEY
+)
+      .then(() => {
+        console.log("Email notification sent successfully.");
+      })
       .catch((err) => {
-        console.log("Could not send email notification:", err);
+        console.warn("Could not send email notification:", err);
       });
   }
 
@@ -974,7 +1000,7 @@ function showMagazineCover() {
   scene.style.justifyContent = "flex-start";
 
   const img = document.createElement("img");
-  setImageSrc(img, "assets/images/magazine-cover.jpeg");
+  setImageSrc(img, "assets/images/magazine-cover-v2.jpeg");
   img.alt = "Magazine Cover";
 
   img.style.width = "90%";
@@ -1013,11 +1039,6 @@ function showMagazineCover() {
   scene.appendChild(text);
 
   transitionToScene(scene);
-
-  window.scrollTo({
-      top: 0,
-      behavior: "instant"
-  });
 }
 
 /* ========================================
@@ -1076,9 +1097,4 @@ function showArtwork() {
   scene.appendChild(button);
 
   transitionToScene(scene);
-
-  window.scrollTo({
-      top: 0,
-      behavior: "instant"
-  });
 }
