@@ -496,6 +496,15 @@ function renderLetterPage(titleEl, textEl, indicatorEl, prevBtn, nextBtn) {
   titleEl.style.display = page.title ? "block" : "none";
   textEl.textContent = page.text;
 
+  // Smaller font only for the last two Hindi poem pages
+  if (currentPageIndex >= pages.length - 2) {
+    textEl.style.fontSize = "0.92rem";
+    textEl.style.lineHeight = "1.8";
+  } else {
+    textEl.style.fontSize = "";
+    textEl.style.lineHeight = "";
+  }
+
   indicatorEl.textContent = `${currentPageIndex + 1} of ${pages.length}`;
 
   prevBtn.disabled = currentPageIndex === 0;
