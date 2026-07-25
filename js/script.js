@@ -365,7 +365,7 @@ function showEnvelope() {
 
   const text = document.createElement("p");
   text.className = "envelope-text";
-  text.textContent = "A Little Something";
+  text.textContent = "My Trial at a Digital Letter";
   text.style.opacity = "0";
 
   const flap = document.createElement("div");
@@ -1031,7 +1031,7 @@ function showMagazineCover() {
       </p>
 
       <p style="margin-top:10px;">
-        — Your Elderly Person
+        — Your Elderly Person (whom you don't trust anymore🥹😭)
       </p>
   `;
 
