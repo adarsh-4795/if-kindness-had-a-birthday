@@ -365,7 +365,7 @@ function showEnvelope() {
 
   const text = document.createElement("p");
   text.className = "envelope-text";
-  text.textContent = "My Trial at a Digital Letter";
+  text.textContent = "My First Attempt at a Digital Letter✨\n(After about 1000 trials though😜)";
   text.style.opacity = "0";
 
   const flap = document.createElement("div");
@@ -399,7 +399,7 @@ setTimeout(() => {
     }, 800);
     setTimeout(() => {
       showLetter();
-    }, 1700);
+    }, 5700);
   });
 
   transitionToScene(scene);
